@@ -1,0 +1,15 @@
+[ ] Register user
+[ ] Login user
+[ ] Who am I
+[ ] Add new note
+[ ] Update note
+[ ] Get all notes
+[ ] Get single note
+[ ] Delete note
+[ ] Log out
+
+
+
+[ ] Use Controller for receiving the request, validation & sending the response.
+[ ] Use Models to have the database logics available.
+[ ] Use Schemas to have the database collection schema.
