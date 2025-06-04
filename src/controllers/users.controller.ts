@@ -70,12 +70,14 @@ const loginUser: RequestHandler = async (
           .cookie("auth_token", token, {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
           })
           .cookie("user", userData, {
             httpOnly: false,
             maxAge: 24 * 60 * 60 * 1000,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
           })
           .status(StatusCodes.OK)
           .json({
