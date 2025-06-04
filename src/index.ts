@@ -25,7 +25,7 @@ app.use(
     //   if (origin && allowedOrigins.includes(origin))
     //     return callback(null, true);
     // },
-    origin: "http://localhost:3000",
+    origin: "https://pn-web.netlify.app",
     credentials: true,
   })
 );
