@@ -23,8 +23,12 @@ app.use(
         "https://pn-web.netlify.app/",
       ];
 
-      if (origin && allowedOrigins.includes(origin))
-        return callback(null, true);
+      if (!origin || allowedOrigins.includes(origin)) {
+        // Allow requests with no origin (like server-to-server or health checks)
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
     },
     // origin: "http://localhost:3000",
     credentials: true,
