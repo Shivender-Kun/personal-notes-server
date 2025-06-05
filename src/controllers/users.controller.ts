@@ -72,14 +72,16 @@ const loginUser: RequestHandler = async (
           .cookie("auth_token", token, {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
-            secure: true, // Set to true if using HTTPS
             sameSite: "none",
+            secure: true,
+            domain: ".shivender.pro", // ✅ enables subdomain sharing
           })
           .cookie("user", userData, {
             httpOnly: false,
             maxAge: 24 * 60 * 60 * 1000,
-            secure: true, // Set to true if using HTTPS
             sameSite: "none",
+            secure: true,
+            domain: ".shivender.pro", // ✅ enables subdomain sharing
           })
           .status(StatusCodes.OK)
           .json({
@@ -159,8 +161,17 @@ const logoutUser: RequestHandler = async (
   next: NextFunction
 ) => {
   res
-    .clearCookie("auth_token", { httpOnly: true })
-    .clearCookie("user")
+    .clearCookie("auth_token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      domain: ".shivender.pro",
+    })
+    .clearCookie("user", {
+      secure: true,
+      sameSite: "none",
+      domain: ".shivender.pro",
+    })
     .status(StatusCodes.OK)
     .json({ message: "Logged out succesfully" });
 };
