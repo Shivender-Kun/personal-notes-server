@@ -46,6 +46,8 @@ const loginUser: RequestHandler = async (
 ) => {
   const { email, password } = req.body;
 
+  console.log(req.originalUrl);
+
   try {
     const userExists = await User.get(email); // Check if user exists in the database
 
@@ -70,13 +72,13 @@ const loginUser: RequestHandler = async (
           .cookie("auth_token", token, {
             httpOnly: true,
             maxAge: 24 * 60 * 60 * 1000,
-            secure: true,
+            secure: true, // Set to true if using HTTPS
             sameSite: "none",
           })
           .cookie("user", userData, {
             httpOnly: false,
             maxAge: 24 * 60 * 60 * 1000,
-            secure: true,
+            secure: true, // Set to true if using HTTPS
             sameSite: "none",
           })
           .status(StatusCodes.OK)

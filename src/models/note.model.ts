@@ -72,7 +72,7 @@ async function update(id: string, note: INote) {
 }
 
 async function remove(id: string) {
-  const document = documentModel.findByIdAndUpdate(id, { isDeleted: true });
+  const document = documentModel.findByIdAndDelete(id);
   return document;
 }
 

@@ -16,16 +16,17 @@ app.use(cookieParser());
 // Enable CORS for all routes in the application
 app.use(
   cors({
-    // origin: (origin, callback) => {
-    //   const allowedOrigins = [
-    //     "http://localhost:3000",
-    //     "http://192.168.1.3:3000",
-    //   ];
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://192.168.1.3:3000",
+        "https://pn-web.netlify.app/",
+      ];
 
-    //   if (origin && allowedOrigins.includes(origin))
-    //     return callback(null, true);
-    // },
-    origin: "https://pn-web.netlify.app",
+      if (origin && allowedOrigins.includes(origin))
+        return callback(null, true);
+    },
+    // origin: "http://localhost:3000",
     credentials: true,
   })
 );
