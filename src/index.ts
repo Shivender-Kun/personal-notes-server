@@ -19,8 +19,8 @@ app.use(
     origin: (origin, callback) => {
       const allowedOrigins = [
         "http://localhost:3000",
-        "http://192.168.1.3:3000",
         "https://pn-web.netlify.app",
+        "https://notes.shivender.pro",
       ];
 
       if (!origin || allowedOrigins.includes(origin)) {
