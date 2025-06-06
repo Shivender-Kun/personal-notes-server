@@ -44,9 +44,9 @@ const loginUser: RequestHandler = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { email, password } = req.body;
+  const csrfToken = req.csrfToken(); // Get CSRF token from the request
 
-  console.log(req.originalUrl);
+  const { email, password } = req.body;
 
   try {
     const userExists = await User.get(email); // Check if user exists in the database
@@ -74,14 +74,21 @@ const loginUser: RequestHandler = async (
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "none",
             secure: true,
-            domain: ".shivender.pro", // ✅ enables subdomain sharing
+            // domain: ".shivender.pro", // ✅ enables subdomain sharing
           })
           .cookie("user", userData, {
             httpOnly: false,
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "none",
             secure: true,
-            domain: ".shivender.pro", // ✅ enables subdomain sharing
+            // domain: ".shivender.pro", // ✅ enables subdomain sharing
+          })
+          .cookie("csrf_token", csrfToken, {
+            httpOnly: false,
+            maxAge: 24 * 60 * 60 * 1000,
+            sameSite: "none",
+            secure: true,
+            // domain: ".shivender.pro", // ✅ enables subdomain sharing
           })
           .status(StatusCodes.OK)
           .json({

@@ -10,6 +10,8 @@ const registerAdmin: RequestHandler = async (
   res: Response,
   next: NextFunction
 ) => {
+  req.csrfToken = () => ""; // ! This line is a workaround to avoid CSRF token validation in the request body.
+
   const { email, password } = req.body;
 
   try {
@@ -44,6 +46,8 @@ const loginAdmin: RequestHandler = async (
   res: Response,
   next: NextFunction
 ) => {
+  req.csrfToken = () => ""; // ! This line is a workaround to avoid CSRF token validation in the request body.
+
   const { email, password, secret } = req.body;
 
   try {

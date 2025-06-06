@@ -5,9 +5,12 @@ import {
 import controllers from "../controllers";
 import { validate, authHandler } from "../middlewares";
 import { Router } from "express";
+import csurf from "csurf";
 
 // Set up routes for the application
 const router = Router();
+
+const csrfProtection = csurf({ cookie: true, ignoreMethods: ["POST"] });
 
 // Define the other routes
 router.post(
@@ -16,7 +19,12 @@ router.post(
   controllers.user.registerUser
 );
 
-router.post("/login", validate(loginUserSchema), controllers.user.loginUser);
+router.post(
+  "/login",
+  validate(loginUserSchema),
+  csrfProtection,
+  controllers.user.loginUser
+);
 
 router.get("/details", authHandler, controllers.user.userDetails);
 
