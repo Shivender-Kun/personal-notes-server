@@ -52,14 +52,10 @@ async function get(email: string, id?: string) {
       password: 0,
       _id: 0,
       __v: 0,
-      createdAt: 0,
       updatedAt: 0,
     });
   } else {
-    document = documentModel.findOne(
-      { email },
-      { __v: 0, createdAt: 0, updatedAt: 0 }
-    );
+    document = documentModel.findOne({ email }, { __v: 0, updatedAt: 0 });
   }
   return document;
 }
