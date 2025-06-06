@@ -10,8 +10,8 @@ const addNote: RequestHandler = async (
   next: NextFunction
 ) => {
   const { userId: userRef } = res.locals;
-  const { title, content, labels } = req.body;
-  const note = { title, content, labels, userRef };
+  const { title, content, labels, bgColor, isPinned } = req.body;
+  const note = { title, content, labels, userRef, bgColor, isPinned };
 
   try {
     const noteAdded = await Note.create(note);
