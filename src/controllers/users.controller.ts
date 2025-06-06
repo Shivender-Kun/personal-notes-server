@@ -120,8 +120,6 @@ const userDetails: RequestHandler = async (
         user,
       });
 
-    console.log(user);
-
     return next(CustomErrorHandler.badRequest());
   } catch (error) {
     next(error);
