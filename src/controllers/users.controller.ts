@@ -74,21 +74,21 @@ const loginUser: RequestHandler = async (
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "none",
             secure: true,
-            // domain: ".shivender.pro", // ✅ enables subdomain sharing
+            domain: ".shivender.pro", // ✅ enables subdomain sharing
           })
           .cookie("user", userData, {
             httpOnly: false,
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "none",
             secure: true,
-            // domain: ".shivender.pro", // ✅ enables subdomain sharing
+            domain: ".shivender.pro", // ✅ enables subdomain sharing
           })
           .cookie("csrf_token", csrfToken, {
             httpOnly: false,
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "none",
             secure: true,
-            // domain: ".shivender.pro", // ✅ enables subdomain sharing
+            domain: ".shivender.pro", // ✅ enables subdomain sharing
           })
           .status(StatusCodes.OK)
           .json({
@@ -176,6 +176,11 @@ const logoutUser: RequestHandler = async (
       secure: true,
       sameSite: "none",
       domain: ".shivender.pro",
+    })
+    .cookie("csrf_token", {
+      sameSite: "none",
+      secure: true,
+      domain: ".shivender.pro", // ✅ enables subdomain sharing
     })
     .status(StatusCodes.OK)
     .json({ message: "Logged out succesfully" });
