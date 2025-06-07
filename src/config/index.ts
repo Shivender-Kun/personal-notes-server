@@ -10,7 +10,7 @@ export const {
   DB_CLUSTER = "",
   DB_DATABASE = "",
   DEBUG_MODE = true,
-  JWT_SECRET = "my-diary-secret",
+  JWT_SECRET = "personal-notes-secret",
   NODE_ENV = "development",
   ADMIN_SECRET_KEY,
   PORT = 3001,
