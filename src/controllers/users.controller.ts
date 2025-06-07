@@ -4,6 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import Hashing from "../services/hashUtility";
 import { User } from "../models";
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 const registerUser: RequestHandler = async (
   req: Request,
   res: Response,
@@ -74,21 +76,21 @@ const loginUser: RequestHandler = async (
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "none",
             secure: true,
-            domain: ".shivender.pro", // ✅ enables subdomain sharing
+            ...(!isDevelopment && { domain: ".shivender.pro" }), // ✅ enables subdomain sharing
           })
           .cookie("user", userData, {
             httpOnly: false,
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "none",
             secure: true,
-            domain: ".shivender.pro", // ✅ enables subdomain sharing
+            ...(!isDevelopment && { domain: ".shivender.pro" }), // ✅ enables subdomain sharing
           })
           .cookie("csrf_token", csrfToken, {
             httpOnly: false,
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "none",
             secure: true,
-            domain: ".shivender.pro", // ✅ enables subdomain sharing
+            ...(!isDevelopment && { domain: ".shivender.pro" }), // ✅ enables subdomain sharing
           })
           .status(StatusCodes.OK)
           .json({
@@ -170,20 +172,42 @@ const logoutUser: RequestHandler = async (
       httpOnly: true,
       secure: true,
       sameSite: "none",
-      domain: ".shivender.pro",
+      ...(!isDevelopment && { domain: ".shivender.pro" }),
     })
     .clearCookie("user", {
       secure: true,
       sameSite: "none",
-      domain: ".shivender.pro",
+      ...(!isDevelopment && { domain: ".shivender.pro" }),
     })
     .cookie("csrf_token", {
       sameSite: "none",
       secure: true,
-      domain: ".shivender.pro", // ✅ enables subdomain sharing
+      ...(!isDevelopment && { domain: ".shivender.pro" }), // ✅ enables subdomain sharing
     })
     .status(StatusCodes.OK)
     .json({ message: "Logged out succesfully" });
+};
+
+const forgotPassword: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { email } = req.body;
+
+  try {
+    const userExists = await User.get(email.toLowerCase().trim());
+
+    if (userExists) {
+      // For now, we will just return a success message
+      return res.status(StatusCodes.OK).json({
+        message: "A password reset link has been sent.",
+      });
+    }
+    return next(CustomErrorHandler.notFound("User not found"));
+  } catch (error) {
+    next(error);
+  }
 };
 
 export default {
@@ -192,4 +216,5 @@ export default {
   userDetails,
   updateUser,
   logoutUser,
+  forgotPassword,
 };
