@@ -10,11 +10,13 @@ export interface IUser {
   password?: string;
   coverPicture?: string;
   profilePicture?: string;
-  username: string;
+  username?: string;
   // themeRef?: string;
   isDeleted?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: number;
 }
 
 export interface ILabel {
