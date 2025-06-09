@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import { model, Schema, Types } from "mongoose";
 import { Hash } from "../services";
 import { IUser } from "../types";
 
@@ -12,8 +12,13 @@ const userSchema = new Schema(
     },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
+    dob: { type: Date },
     profilePicture: { type: String, required: true },
     coverPicture: { type: String },
+    isPrivate: { type: Boolean, default: false },
+    isDeleted: { type: Boolean, default: false },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Number },
     // themeRef: { type: Schema.Types.ObjectId, ref: "Theme" },
   },
   { timestamps: true }
@@ -45,7 +50,15 @@ async function create(user: IUser) {
   return save;
 }
 
-async function get(email: string, id?: string) {
+async function get({
+  id,
+  email,
+  resetPasswordToken,
+}: {
+  id?: string;
+  email?: string;
+  resetPasswordToken?: string;
+}) {
   let document;
   if (id) {
     document = documentModel.findById(id, {
@@ -55,12 +68,18 @@ async function get(email: string, id?: string) {
       updatedAt: 0,
     });
   } else {
-    document = documentModel.findOne({ email }, { __v: 0, updatedAt: 0 });
+    document = documentModel.findOne(
+      {
+        ...(email && { email }),
+        ...(resetPasswordToken && { resetPasswordToken }),
+      },
+      { __v: 0, updatedAt: 0 }
+    );
   }
   return document;
 }
 
-async function update(_id: string, user: IUser) {
+async function update(_id: string | Types.ObjectId, user: IUser) {
   const data = { ...user };
   delete data.email;
 
