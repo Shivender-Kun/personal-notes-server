@@ -34,13 +34,11 @@ export const sendResetMail = async (
 
   try {
     const info = await transport.sendMail({
-      from: `"Support" <${process.env.SUPPORT_EMAIL}>`,
+      from: `"Support" <${process.env.ZOHO_EMAIL}>`,
       to,
       subject: "Reset Your Password - Personal Notes",
       html,
     });
-
-    console.log("Mail Information", info);
 
     return info.messageId;
   } catch (error) {
