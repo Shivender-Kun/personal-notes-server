@@ -1,8 +1,10 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import { CustomErrorHandler, Token } from "../services";
+import { CustomErrorHandler, Hash, Token } from "../services";
 import { StatusCodes } from "http-status-codes";
 import Hashing from "../services/hashUtility";
 import { User } from "../models";
+import { generateResetToken } from "../services/generateResetToken";
+import { sendResetMail } from "../utils/mailer";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -20,21 +22,21 @@ const registerUser: RequestHandler = async (
   userData.username = userData.email.split("@")[0]; // Extract username from email
 
   try {
-    const userExists = await User.get(userData.email);
+    const user = await User.get({ email: userData.email });
 
     // If user exists, return an error response with status code 409
-    if (userExists)
+    if (user)
       return next(CustomErrorHandler.alreadyExists("Account already exists!"));
 
-    const user = await User.create(userData); // Create a new user in the database
+    const newUser = await User.create(userData); // Create a new user in the database
 
-    if (user)
+    if (newUser)
       return res.status(StatusCodes.CREATED).json({
         message: "User registered successfully!",
       });
 
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      message: "Failed to register user, please try again later.",
+      message: "Failed to register user, please try again",
     });
   } catch (error) {
     next(error);
@@ -51,23 +53,20 @@ const loginUser: RequestHandler = async (
   const { email, password } = req.body;
 
   try {
-    const userExists = await User.get(email); // Check if user exists in the database
+    const user = await User.get({ email }); // Check if user exists in the database
 
     // If user exists, verify the password and return the auth_token
-    if (userExists) {
-      const verifyPassword = await Hashing.validate(
-        password,
-        userExists.password
-      );
+    if (user) {
+      const verifyPassword = await Hashing.validate(password, user.password);
 
       // If password is verified, generate the auth_token and return it in the response
       if (verifyPassword) {
-        const token = Token.generate({ id: userExists._id }, "1d"); // Generate a token valid for 1 day
+        const token = Token.generate({ id: user._id }, "1d"); // Generate a token valid for 1 day
 
         const userData = JSON.stringify({
-          username: userExists.username,
-          coverPicture: userExists.coverPicture,
-          profilePicture: userExists.profilePicture,
+          username: user.username,
+          coverPicture: user.coverPicture,
+          profilePicture: user.profilePicture,
         });
 
         return res
@@ -114,7 +113,7 @@ const userDetails: RequestHandler = async (
   const { userId } = res.locals;
 
   try {
-    const user = await User.get("", userId);
+    const user = await User.get({ id: userId });
 
     if (user)
       return res.status(StatusCodes.OK).json({
@@ -196,15 +195,64 @@ const forgotPassword: RequestHandler = async (
   const { email } = req.body;
 
   try {
-    const userExists = await User.get(email.toLowerCase().trim());
+    const user = await User.get({ email: email.toLowerCase().trim() });
 
-    if (userExists) {
-      // For now, we will just return a success message
-      return res.status(StatusCodes.OK).json({
-        message: "A password reset link has been sent.",
-      });
+    if (user) {
+      const token = generateResetToken();
+
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+      await user.save();
+
+      const mailId = await sendResetMail(user.email, user.username, token);
+
+      if (mailId)
+        return res.status(StatusCodes.OK).json({
+          mailId,
+          email: user.email,
+          message: "A password reset link has been sent.",
+        });
     }
     return next(CustomErrorHandler.notFound("User not found"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { newPassword, token } = req.body;
+
+  try {
+    const user = await User.get({ resetPasswordToken: token });
+
+    if (user) {
+      const tokenExpiry = user.resetPasswordExpires;
+
+      const isTokenExpired = Date.now() > tokenExpiry!;
+      if (isTokenExpired) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Link expired. Please request a new reset link" });
+      }
+
+      user.password = newPassword;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+
+      await user.save();
+
+      return res.status(StatusCodes.OK).json({
+        message: "Password reset succesfully",
+      });
+    } else {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Invalid link. Please request a new reset link" });
+    }
   } catch (error) {
     next(error);
   }
@@ -216,5 +264,6 @@ export default {
   userDetails,
   updateUser,
   logoutUser,
+  resetPassword,
   forgotPassword,
 };

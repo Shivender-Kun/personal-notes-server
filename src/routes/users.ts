@@ -1,6 +1,8 @@
 import {
   createUserSchema,
+  forgotPasswordSchema,
   loginUserSchema,
+  resetPasswordSchema,
 } from "../validations/users.validation";
 import controllers from "../controllers";
 import { validate, authHandler } from "../middlewares";
@@ -32,7 +34,17 @@ router.patch("/update", authHandler, controllers.user.updateUser);
 
 router.post("/logout", controllers.user.logoutUser);
 
-// router.post("/forgot-password", () => {});
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordSchema),
+  controllers.user.forgotPassword
+);
+
+router.post(
+  "/reset-password",
+  validate(resetPasswordSchema),
+  controllers.user.resetPassword
+);
 
 // router.delete("/delete", () => {});
 
