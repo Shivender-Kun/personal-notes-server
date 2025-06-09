@@ -6,22 +6,12 @@ const Hashing = {
 
   // Function to generate a hashed key using bcrypt
   async generate(key: string): Promise<string> {
-    try {
-      return await bcrypt.hash(key, this.saltRounds);
-    } catch (error) {
-      console.error(error);
-      return "";
-    }
+    return await bcrypt.hash(key, this.saltRounds);
   },
 
   // Function to validate a hashed key using bcrypt
   async validate(key: string, hash: string): Promise<boolean> {
-    try {
-      return await bcrypt.compare(key, hash);
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
+    return await bcrypt.compare(key, hash);
   },
 };
 
