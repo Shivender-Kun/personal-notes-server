@@ -66,6 +66,9 @@ async function get({
       _id: 0,
       __v: 0,
       updatedAt: 0,
+      resetPasswordExpires: 0,
+      resetPasswordToken: 0,
+      isDeleted: 0,
     });
   } else {
     document = documentModel.findOne(
@@ -73,7 +76,13 @@ async function get({
         ...(email && { email }),
         ...(resetPasswordToken && { resetPasswordToken }),
       },
-      { __v: 0, updatedAt: 0 }
+      {
+        __v: 0,
+        updatedAt: 0,
+        resetPasswordExpires: 0,
+        resetPasswordToken: 0,
+        isDeleted: 0,
+      }
     );
   }
   return document;
@@ -89,6 +98,9 @@ async function update(_id: string | Types.ObjectId, user: IUser) {
     _id: 0,
     createdAt: 0,
     updatedAt: 0,
+    resetPasswordExpires: 0,
+    resetPasswordToken: 0,
+    isDeleted: 0,
   });
 
   return document;
