@@ -137,7 +137,7 @@ const updateUser: RequestHandler = async (
 
   try {
     const updateProfile = await User.update(userId, {
-      username,
+      username: username.trim(),
       coverPicture,
       profilePicture,
     });
@@ -145,12 +145,6 @@ const updateUser: RequestHandler = async (
     if (updateProfile)
       return res.status(StatusCodes.OK).json({
         message: "Profile updated successfully",
-        data: {
-          email: updateProfile.email,
-          username: updateProfile.username,
-          coverPicture: updateProfile.coverPicture,
-          profilePicture: updateProfile.profilePicture,
-        },
       });
 
     return res.status(StatusCodes.NOT_FOUND).json({
@@ -258,12 +252,38 @@ const resetPassword: RequestHandler = async (
   }
 };
 
+const deleteAccount: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = res.locals;
+
+  try {
+    const updateProfile = await User.update(userId, {
+      isDeleted: true,
+    });
+
+    if (updateProfile)
+      return res.status(StatusCodes.OK).json({
+        message: "Profile deleted successfully",
+      });
+
+    return res.status(StatusCodes.NOT_FOUND).json({
+      message: "User not found",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   registerUser,
   loginUser,
   userDetails,
   updateUser,
   logoutUser,
+  deleteAccount,
   resetPassword,
   forgotPassword,
 };
