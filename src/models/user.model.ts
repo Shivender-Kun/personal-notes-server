@@ -8,7 +8,6 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      lowercase: true,
     },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
@@ -61,15 +60,18 @@ async function get({
 }) {
   let document;
   if (id) {
-    document = documentModel.findById(id, {
-      password: 0,
-      _id: 0,
-      __v: 0,
-      updatedAt: 0,
-      resetPasswordExpires: 0,
-      resetPasswordToken: 0,
-      isDeleted: 0,
-    });
+    document = documentModel.findOne(
+      { _id: id, isDeleted: false },
+      {
+        password: 0,
+        _id: 0,
+        __v: 0,
+        updatedAt: 0,
+        resetPasswordExpires: 0,
+        resetPasswordToken: 0,
+        isDeleted: 0,
+      }
+    );
   } else {
     document = documentModel.findOne(
       {
