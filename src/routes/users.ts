@@ -46,6 +46,6 @@ router.post(
   controllers.user.resetPassword
 );
 
-// router.delete("/delete", () => {});
+router.delete("/delete", authHandler, controllers.user.deleteAccount);
 
 export default router;
