@@ -12,11 +12,11 @@ const loginUserSchema = Joi.object({
 });
 
 const updateUserSchema = Joi.object({
-  username: Joi.string(),
   coverPicture: Joi.string(),
   email: Joi.string().email(),
   profilePicture: Joi.string(),
   userId: Joi.string().required(),
+  username: Joi.string().min(1).max(32),
 });
 
 const forgotPasswordSchema = Joi.object({
