@@ -45,6 +45,10 @@ app.use("/api/notes", routes.Note);
 app.use("/api/labels", routes.Label);
 app.use("/api/users", routes.User);
 
+app.post("/api/heartbeat", (req, res, next) => {
+  res.status(200).json({ message: "Success" });
+});
+
 // Handle errors
 app.use(errorHandler);
 
