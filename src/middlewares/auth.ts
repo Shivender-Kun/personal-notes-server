@@ -27,7 +27,7 @@ const authHandler = async (req: Request, res: Response, next: NextFunction) => {
           // Handle CSRF error, e.g. invalid or missing token
           return res
             .status(StatusCodes.FORBIDDEN)
-            .json({ error: "Invalid CSRF token" });
+            .json({ message: "Invalid CSRF token" });
         }
         next();
       });
