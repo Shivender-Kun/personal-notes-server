@@ -1,5 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { CustomErrorHandler, Token } from "../services";
+import csurf from "csurf";
+import { StatusCodes } from "http-status-codes";
+
+const csrfProtection = csurf({ cookie: true });
 
 const authHandler = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
@@ -16,7 +20,17 @@ const authHandler = async (req: Request, res: Response, next: NextFunction) => {
 
     if (typeof validateToken !== "string") {
       res.locals.userId = validateToken.id;
-      next();
+
+      // Apply CSRF protection only if user is authenticated
+      csrfProtection(req, res, (err) => {
+        if (err) {
+          // Handle CSRF error, e.g. invalid or missing token
+          return res
+            .status(StatusCodes.FORBIDDEN)
+            .json({ message: "Invalid CSRF token" });
+        }
+        next();
+      });
     }
   } catch (error) {
     next(error);

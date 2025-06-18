@@ -10,8 +10,8 @@ const addNote: RequestHandler = async (
   next: NextFunction
 ) => {
   const { userId: userRef } = res.locals;
-  const { title, content, labels } = req.body;
-  const note = { title, content, labels, userRef };
+  const { title, content, labels, bgColor, isPinned } = req.body;
+  const note = { title, content, labels, userRef, bgColor, isPinned };
 
   try {
     const noteAdded = await Note.create(note);
@@ -85,6 +85,37 @@ const notesList: RequestHandler = async (
                 { $match: { isPinned: true } },
                 { $sort: { updatedAt: -1 } },
                 { $limit: DEFAULT_PAGINATION_LIMIT }, // cap pinned items
+                {
+                  $lookup: {
+                    from: "labels",
+                    localField: "labels",
+                    foreignField: "_id",
+                    as: "labels",
+                  },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    title: 1,
+                    content: 1,
+                    bgColor: 1,
+                    isPinned: 1,
+                    isArchived: 1,
+                    isDeleted: 1,
+                    updatedAt: 1,
+                    createdAt: 1,
+                    labels: {
+                      $map: {
+                        input: "$labels",
+                        as: "label",
+                        in: {
+                          _id: "$$label._id",
+                          name: "$$label.name",
+                        },
+                      },
+                    }, // Include labels in the pinned notes
+                  },
+                },
               ],
             }),
             unpinned: [
@@ -92,6 +123,37 @@ const notesList: RequestHandler = async (
               { $sort: { updatedAt: -1 } },
               { $skip: offset },
               { $limit: limit + 1 }, // fetch one extra to determine `hasMore`
+              {
+                $lookup: {
+                  from: "labels",
+                  localField: "labels",
+                  foreignField: "_id",
+                  as: "labels",
+                },
+              },
+              {
+                $project: {
+                  _id: 1,
+                  title: 1,
+                  content: 1,
+                  bgColor: 1,
+                  isPinned: 1,
+                  isArchived: 1,
+                  isDeleted: 1,
+                  updatedAt: 1,
+                  createdAt: 1,
+                  labels: {
+                    $map: {
+                      input: "$labels",
+                      as: "label",
+                      in: {
+                        _id: "$$label._id",
+                        name: "$$label.name",
+                      },
+                    },
+                  }, // Include labels in the unpinned notes
+                },
+              },
             ],
           },
         },
@@ -120,6 +182,37 @@ const notesList: RequestHandler = async (
               { $sort: { updatedAt: -1 } },
               { $skip: offset },
               { $limit: limit + 1 },
+              {
+                $lookup: {
+                  from: "labels",
+                  localField: "labels",
+                  foreignField: "_id",
+                  as: "labels",
+                },
+              },
+              {
+                $project: {
+                  _id: 1,
+                  title: 1,
+                  content: 1,
+                  bgColor: 1,
+                  isPinned: 1,
+                  isArchived: 1,
+                  isDeleted: 1,
+                  updatedAt: 1,
+                  createdAt: 1,
+                  labels: {
+                    $map: {
+                      input: "$labels",
+                      as: "label",
+                      in: {
+                        _id: "$$label._id",
+                        name: "$$label.name",
+                      },
+                    },
+                  }, // Include labels in the pinned notes
+                },
+              },
             ],
           },
         },
@@ -253,17 +346,13 @@ const deleteNote: RequestHandler = async (
   next: NextFunction
 ) => {
   const { id } = req.params;
-  const { permanently } = req.query;
-  let noteUpdated;
 
   try {
-    if (permanently === "true") noteUpdated = await Note.remove(id);
-    else
-      noteUpdated = await Note.update(id, {
-        isDeleted: true,
-        isArchived: false,
-        isPinned: false,
-      });
+    const noteUpdated = await Note.update(id, {
+      isDeleted: true,
+      isArchived: false,
+      isPinned: false,
+    });
 
     if (noteUpdated)
       return res
@@ -273,6 +362,29 @@ const deleteNote: RequestHandler = async (
     return res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ message: "Failed to delete note" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteNotePermanently: RequestHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id } = req.params;
+
+  try {
+    const noteRemoved = await Note.remove(id);
+
+    if (noteRemoved)
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Note deleted permanently" });
+
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Failed to delete note permanently" });
   } catch (error) {
     next(error);
   }
@@ -313,4 +425,5 @@ export default {
   unarchiveNote,
   deleteNote,
   restoreNote,
+  deleteNotePermanently,
 };

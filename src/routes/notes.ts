@@ -34,8 +34,10 @@ router.patch("/:id/archive", authHandler, controllers.note.archiveNote);
 
 router.patch("/:id/unarchive", authHandler, controllers.note.unarchiveNote);
 
-router.delete("/:id", authHandler, controllers.note.deleteNote);
-
 router.patch("/:id/restore", authHandler, controllers.note.restoreNote);
+
+router.patch("/:id/delete", authHandler, controllers.note.deleteNote);
+
+router.delete("/:id", authHandler, controllers.note.deleteNotePermanently);
 
 export default router;
